@@ -1,0 +1,255 @@
+<script>
+	import { customFetch } from '$lib/fetch.js';
+	import { goto } from '$app/navigation';
+	import { onMount } from 'svelte';
+	import AppPage from '../../../lib/AppPage.svelte';
+
+	let id = null;
+	let files = [];
+	let file = null;
+	let fileName = '';
+
+	async function getFiles() {
+		const filesSrv = await customFetch(`/api/${id}/files`);
+		files = filesSrv ?? [];
+	}
+
+	onMount(async () => {
+		id = new URLSearchParams(window.location.search).get('id');
+		if (!id) goto('/app');
+		getFiles();
+	});
+
+	async function downloadFile(res, fileName) {
+		//create a blob from the response
+		const blob = await res.blob();
+		//create a URL from the blob
+		const url = URL.createObjectURL(blob);
+		//create a link to download the file
+		const link = document.createElement('a');
+		link.href = url;
+		link.download = fileName;
+		document.body.appendChild(link);
+		link.click();
+		document.body.removeChild(link);
+	}
+
+	async function download(file) {
+		const download = await customFetch(`/${id}/${file}`, {}, null, true);
+		if (download.status === 401) {
+			//TODO: key required`
+			const params = new URLSearchParams();
+			params.append('file', file);
+			params.append('type', 'download');
+			params.append('expiresIn', '10s');
+			const key = await customFetch(`/api/${id}/generateToken?${params.toString()}`);
+			if (!key) return;
+			const downloadParams = new URLSearchParams();
+			downloadParams.append('key', key);
+			const download = await customFetch(
+				`/${id}/${file}?${downloadParams.toString()}`,
+				{},
+				null,
+				true
+			);
+			if (download.status === 200) {
+				downloadFile(download, file);
+			} else {
+				alert('Something went wrong');
+			}
+		} else if (download.status === 200) {
+			downloadFile(download.data, file);
+		} else {
+			alert('Something went wrong');
+		}
+	}
+
+	async function deleteFile(file) {
+		if (!confirm(`Are you sure you want to delete ${file}?`)) return;
+
+		const tokenParams = new URLSearchParams();
+		tokenParams.append('file', file);
+		tokenParams.append('type', 'delete');
+		tokenParams.append('expiresIn', '10s');
+		const key = await customFetch(`/api/${id}/generateToken?${tokenParams.toString()}`);
+		if (!key) return;
+
+		const deleteParams = new URLSearchParams();
+		deleteParams.append('key', key);
+		await customFetch(`/${id}/${file}?${deleteParams.toString()}`, {
+			method: 'DELETE'
+		});
+
+		getFiles();
+	}
+
+	async function renameFile(file, newName, newBucket) {
+		if (!confirm(`Are you sure you want to rename ${file} to ${newName} in ${newBucket}?`)) return;
+
+		const tokenParams = new URLSearchParams();
+		tokenParams.append('file', file);
+		tokenParams.append('type', 'rename');
+		tokenParams.append('expiresIn', '10s');
+		const key = await customFetch(`/api/${id}/generateToken?${tokenParams.toString()}`);
+		if (!key) return;
+
+		const renameParams = new URLSearchParams();
+		renameParams.append('key', key);
+		renameParams.append('bucket', newBucket);
+		renameParams.append('name', newName);
+		await customFetch(`/${id}/${file}?${renameParams.toString()}`, {
+			method: 'PUT'
+		});
+
+		getFiles();
+	}
+</script>
+
+<AppPage>
+	<h1 class="bucketName">{id}</h1>
+
+	<div class="upload">
+		<input
+			type="file"
+			bind:files={file}
+			on:change={(e) => {
+				fileName = e.target?.files[0]?.name;
+			}}
+		/>
+		<input type="text" bind:value={fileName} />
+		<button
+			on:click={async () => {
+				if (!file[0]) return;
+				const formData = new FormData();
+
+				//generate token
+				const tokenParams = new URLSearchParams();
+				tokenParams.append('file', fileName);
+				tokenParams.append('type', 'upload');
+				tokenParams.append('expiresIn', '1m');
+				const key = await customFetch(`/api/${id}/generateToken?${tokenParams.toString()}`);
+				if (!key) return;
+				formData.append('key', key);
+
+				//upload file
+				await customFetch(`/${id}/${fileName}?${new URLSearchParams(formData).toString()}`, {
+					method: 'POST',
+					body: file[0]
+				});
+
+				getFiles();
+			}}>Upload</button
+		>
+	</div>
+
+	<div class="files">
+		<ul>
+			{#each files as file}
+				<div class="file">
+					<button
+						class="fileName"
+						on:click={(e) => {
+							//if holding shift, move file
+							let newBucket = id;
+							if (e.shiftKey) {
+								const bucketPrompt = prompt('Enter a new bucket (or leave blank to keep the same)');
+								if (bucketPrompt) newBucket = bucketPrompt;
+							}
+							const newName = prompt('Enter a new name', file);
+							if (!newName) return;
+							renameFile(file, newName, newBucket);
+						}}>{file}</button
+					>
+					<div class="fileActions">
+						<button on:click={() => download(file)}>Download</button>
+						<button on:click={() => deleteFile(file)}>Delete</button>
+					</div>
+				</div>
+			{/each}
+		</ul>
+	</div>
+
+	<p class="tip">
+		Tip: click on a file to rename it.<br />
+		You can move files across buckets by holding shift and clicking on a file.
+	</p>
+</AppPage>
+
+<style>
+	@import url(https://fonts.bunny.net/css?family=abeezee:400);
+
+	.bucketName {
+		font-size: 2em;
+		font-family: 'abeezee';
+		text-align: center;
+	}
+
+	.files {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		text-align: center;
+	}
+	.file {
+		display: flex;
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+		text-align: center;
+	}
+
+	.fileName {
+		font-size: 1.5em;
+		font-family: 'abeezee';
+		background: transparent;
+		border: none;
+		cursor: pointer;
+	}
+
+	.fileActions {
+		display: flex;
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+		text-align: center;
+		gap: 5px;
+		margin-left: 10px;
+	}
+
+	.fileActions button {
+		border: 1px solid #000;
+		padding: 10px;
+		border-radius: 5px;
+		cursor: pointer;
+	}
+
+	.upload {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		text-align: center;
+		gap: 5px;
+	}
+
+	.upload input {
+		border: 1px solid #000;
+		padding: 10px;
+		border-radius: 5px;
+		cursor: pointer;
+	}
+
+	.upload button {
+		border: 1px solid #000;
+		padding: 10px;
+		border-radius: 5px;
+		cursor: pointer;
+	}
+
+	.tip {
+		font-size: 1em;
+		font-family: 'abeezee';
+		text-align: center;
+		margin-top: 0;
+	}
+</style>

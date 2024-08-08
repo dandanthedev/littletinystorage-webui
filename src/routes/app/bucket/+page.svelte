@@ -2,7 +2,7 @@
 	import { customFetch } from '$lib/fetch.js';
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
-	import AppPage from '../../../../lib/AppPage.svelte';
+	import AppPage from '$lib/AppPage.svelte';
 
 	let id = null;
 	let files = [];

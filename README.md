@@ -1,38 +1,30 @@
-# create-svelte
+<div align="center">
+<img src="https://github.com/dandanthedev/LittleTinyStorage/blob/main/logo.png?raw=true" width="200" height="200">
 
-Everything you need to build a Svelte project, powered by [`create-svelte`](https://github.com/sveltejs/kit/tree/main/packages/create-svelte).
+# LittleTinyStorage WebUI
 
-## Creating a project
+This is a web interface for LittleTinyStorage.
 
-If you're seeing this, you've probably already done this step. Congrats!
+</div>
 
-```bash
-# create a new project in the current directory
-npm create svelte@latest
+## Features
 
-# create a new project in my-app
-npm create svelte@latest my-app
-```
+- Get, upload, delete and rename files (across buckets!)
+- Upload files
+- Generate presigned URLs
 
-## Developing
+## Setup
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
+The easiest way to get started is downloading the latest release from the [releases page](https://github.com/dandanthedev/LittleTinyStorage/releases).
 
-```bash
-npm run dev
+If you want to build it yourself, follow these steps:
 
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
-```
+1. Clone the repository
+2. Run `npm install`
+3. Run `npm run build`
+4. The web interface is now built in the `build` folder!
 
-## Building
+## Usage
 
-To create a production version of your app:
-
-```bash
-npm run build
-```
-
-You can preview the production build with `npm run preview`.
-
-> To deploy your app, you may need to install an [adapter](https://kit.svelte.dev/docs/adapters) for your target environment.
+Open the web interface in your browser. The interface should open.
+It might ask for your LTS API key if it couldn't find it automagically.

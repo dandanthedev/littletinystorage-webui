@@ -14,11 +14,14 @@ jobs:
         run: bun install
       - name: Build
         run: bun run build
+      #zip all files in the build directory to the build.zip file
+      - name: Zip Build
+        run: zip -r build.zip build/*
       #upload all files in the build directory to the github release
       - name: Upload to Github Release
         uses: softprops/action-gh-release@v1
         with:
-          files: build/*
+          files: build.zip
           fail_on_unmatched_files: true
           draft: true
         env:

@@ -11,7 +11,7 @@
 	let instance;
 
 	async function getFiles() {
-		const filesSrv = await customFetch(`/api/${id}/files`);
+		const filesSrv = await customFetch(`/api/${id}/fileStats`);
 		files = filesSrv ?? [];
 	}
 
@@ -95,6 +95,13 @@
 
 		getFiles();
 	}
+
+	function parseSize(size) {
+		if (size < 1024) return `${size} B`;
+		if (size < 1024 * 1024) return `${(size / 1024).toFixed(2)} KB`;
+		if (size < 1024 * 1024 * 1024) return `${(size / 1024 / 1024).toFixed(2)} MB`;
+		return `${(size / 1024 / 1024 / 1024).toFixed(2)} GB`;
+	}
 </script>
 
 <h1 class="bucketName">{id}</h1>
@@ -134,37 +141,57 @@
 </div>
 
 <div class="files">
-	<ul>
-		{#each files as file}
-			<div class="file">
-				<div class="filePreview">
-					{#if file.endsWith('.jpg' || file.endsWith('.png') || file.endsWith('.gif') || file.endsWith('.webp') || file.endsWith('.jpeg'))}
-						<img src={`${instance}/${id}/${file}`} alt={file} />
-					{:else if file.endsWith('.mp4') || file.endsWith('.webm') || file.endsWith('.mkv') || file.endsWith('.avi') || file.endsWith('.mov')}
-						<video src={`${instance}/${id}/${file}`} controls />
-					{/if}
-				</div>
-				<button
-					class="fileName"
-					on:click={(e) => {
-						//if holding shift, move file
-						let newBucket = id;
-						if (e.shiftKey) {
-							const bucketPrompt = prompt('Enter a new bucket (or leave blank to keep the same)');
-							if (bucketPrompt) newBucket = bucketPrompt;
-						}
-						const newName = prompt('Enter a new name', file);
-						if (!newName) return;
-						renameFile(file, newName, newBucket);
-					}}>{file}</button
-				>
-				<div class="fileActions">
-					<button on:click={() => download(file)}>Download</button>
-					<button on:click={() => deleteFile(file)}>Delete</button>
-				</div>
-			</div>
-		{/each}
-	</ul>
+	<table>
+		<thead>
+			<tr>
+				<th>Preview</th>
+				<th>Name</th>
+				<th>Size</th>
+				<th>Actions</th>
+			</tr>
+		</thead>
+		<tbody>
+			{#each files as file}
+				<tr>
+					<td class="filePreview">
+						{#if file.mimeType.startsWith('image')}
+							<img src={`${instance}/${id}/${file.file}`} alt={file.file} />
+						{:else if file.mimeType.startsWith('video')}
+							<video src={`${instance}/${id}/${file.file}`} controls />
+						{:else if file.mimeType.startsWith('audio')}
+							<audio src={`${instance}/${id}/${file.file}`} controls />
+						{:else}
+							<p>{file.mimeType}</p>
+						{/if}
+					</td>
+					<td>
+						<button
+							class="fileName"
+							on:click={(e) => {
+								//if holding shift, move file
+								let newBucket = id;
+								if (e.shiftKey) {
+									const bucketPrompt = prompt(
+										'Enter a new bucket (or leave blank to keep the same)'
+									);
+									if (bucketPrompt) newBucket = bucketPrompt;
+								}
+								const newName = prompt('Enter a new name', file);
+								if (!newName) return;
+								renameFile(file, newName, newBucket);
+							}}>{file.file}</button
+						>
+					</td>
+					<td class="fileSize">{parseSize(file.size)}</td>
+
+					<td class="fileActions">
+						<button on:click={() => download(file)}>Download</button>
+						<button on:click={() => deleteFile(file)}>Delete</button>
+					</td>
+				</tr>
+			{/each}
+		</tbody>
+	</table>
 </div>
 
 <p class="tip">
@@ -188,12 +215,19 @@
 		justify-content: center;
 		text-align: center;
 	}
-	.file {
-		display: flex;
-		flex-direction: row;
-		align-items: center;
-		justify-content: center;
-		text-align: center;
+
+	table {
+		border-collapse: collapse;
+		/*gap between rows*/
+		border-spacing: 0;
+		width: 100%;
+		max-width: 600px;
+		margin-top: 20px;
+	}
+
+	th {
+		font-size: 1.5em;
+		font-family: 'abeezee';
 	}
 
 	.fileName {
@@ -205,13 +239,8 @@
 	}
 
 	.fileActions {
-		display: flex;
-		flex-direction: row;
-		align-items: center;
-		justify-content: center;
 		text-align: center;
 		gap: 5px;
-		margin-left: 10px;
 	}
 
 	.fileActions button {
@@ -258,9 +287,20 @@
 		margin-bottom: 10px;
 	}
 
+	.filePreview p {
+		font-size: 1em;
+		font-family: 'abeezee';
+	}
+
 	.filePreview img {
 		width: 100%;
 		height: 100%;
 		border-radius: 5px;
+	}
+
+	.fileSize {
+		font-size: 1em;
+		font-family: 'abeezee';
+		margin-left: 10px;
 	}
 </style>

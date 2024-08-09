@@ -22,6 +22,7 @@
 		<div class="menu">
 			<a href="/app">Home</a>
 			<a href="/app/generateToken">Generate Token</a>
+			<a href="/app/env">Config</a>
 		</div>
 		<button
 			class="action"
@@ -42,10 +43,9 @@
 		position: absolute;
 		top: 0;
 		left: 0;
-		right: 0;
-		bottom: 0;
-
 		background-color: lightblue;
+		width: 100%;
+		min-height: 100vh;
 	}
 
 	.header {

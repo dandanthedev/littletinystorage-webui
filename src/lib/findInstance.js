@@ -4,7 +4,7 @@ let foundInstance = null;
 
 async function ping(url) {
     const res = await fetch(url + "/api/ping").catch(() => null);
-    if (!res.ok) return false;
+    if (!res?.ok) return false;
     const text = await res.text();
     return text == "littletinystorage";
 }

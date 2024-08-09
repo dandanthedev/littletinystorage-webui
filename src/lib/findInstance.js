@@ -3,7 +3,7 @@ import { goto } from "$app/navigation";
 let foundInstance = null;
 
 async function ping(url) {
-    const res = await fetch(url + "/api/ping");
+    const res = await fetch(url + "/api/ping").catch(() => null);
     if (!res.ok) return false;
     const text = await res.text();
     return text == "littletinystorage";
@@ -23,7 +23,7 @@ export async function findInstance() {
 
     const toPing = ["", "http://localhost:7999"];
     for (const url of toPing) {
-        const urlWorks = await ping(url);
+        const urlWorks = await ping(url).catch(() => false);
         if (urlWorks) {
             foundInstance = url;
             return foundInstance;

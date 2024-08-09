@@ -2,7 +2,6 @@
 	import { customFetch } from '$lib/fetch.js';
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
-	import AppPage from '$lib/AppPage.svelte';
 
 	let id = null;
 	let files = [];
@@ -105,75 +104,73 @@
 	}
 </script>
 
-<AppPage>
-	<h1 class="bucketName">{id}</h1>
+<h1 class="bucketName">{id}</h1>
 
-	<div class="upload">
-		<input
-			type="file"
-			bind:files={file}
-			on:change={(e) => {
-				fileName = e.target?.files[0]?.name;
-			}}
-		/>
-		<input type="text" bind:value={fileName} />
-		<button
-			on:click={async () => {
-				if (!file[0]) return;
-				const formData = new FormData();
+<div class="upload">
+	<input
+		type="file"
+		bind:files={file}
+		on:change={(e) => {
+			fileName = e.target?.files[0]?.name;
+		}}
+	/>
+	<input type="text" bind:value={fileName} />
+	<button
+		on:click={async () => {
+			if (!file[0]) return;
+			const formData = new FormData();
 
-				//generate token
-				const tokenParams = new URLSearchParams();
-				tokenParams.append('file', fileName);
-				tokenParams.append('type', 'upload');
-				tokenParams.append('expiresIn', '1m');
-				const key = await customFetch(`/api/${id}/generateToken?${tokenParams.toString()}`);
-				if (!key) return;
-				formData.append('key', key);
+			//generate token
+			const tokenParams = new URLSearchParams();
+			tokenParams.append('file', fileName);
+			tokenParams.append('type', 'upload');
+			tokenParams.append('expiresIn', '1m');
+			const key = await customFetch(`/api/${id}/generateToken?${tokenParams.toString()}`);
+			if (!key) return;
+			formData.append('key', key);
 
-				//upload file
-				await customFetch(`/${id}/${fileName}?${new URLSearchParams(formData).toString()}`, {
-					method: 'POST',
-					body: file[0]
-				});
+			//upload file
+			await customFetch(`/${id}/${fileName}?${new URLSearchParams(formData).toString()}`, {
+				method: 'POST',
+				body: file[0]
+			});
 
-				getFiles();
-			}}>Upload</button
-		>
-	</div>
+			getFiles();
+		}}>Upload</button
+	>
+</div>
 
-	<div class="files">
-		<ul>
-			{#each files as file}
-				<div class="file">
-					<button
-						class="fileName"
-						on:click={(e) => {
-							//if holding shift, move file
-							let newBucket = id;
-							if (e.shiftKey) {
-								const bucketPrompt = prompt('Enter a new bucket (or leave blank to keep the same)');
-								if (bucketPrompt) newBucket = bucketPrompt;
-							}
-							const newName = prompt('Enter a new name', file);
-							if (!newName) return;
-							renameFile(file, newName, newBucket);
-						}}>{file}</button
-					>
-					<div class="fileActions">
-						<button on:click={() => download(file)}>Download</button>
-						<button on:click={() => deleteFile(file)}>Delete</button>
-					</div>
+<div class="files">
+	<ul>
+		{#each files as file}
+			<div class="file">
+				<button
+					class="fileName"
+					on:click={(e) => {
+						//if holding shift, move file
+						let newBucket = id;
+						if (e.shiftKey) {
+							const bucketPrompt = prompt('Enter a new bucket (or leave blank to keep the same)');
+							if (bucketPrompt) newBucket = bucketPrompt;
+						}
+						const newName = prompt('Enter a new name', file);
+						if (!newName) return;
+						renameFile(file, newName, newBucket);
+					}}>{file}</button
+				>
+				<div class="fileActions">
+					<button on:click={() => download(file)}>Download</button>
+					<button on:click={() => deleteFile(file)}>Delete</button>
 				</div>
-			{/each}
-		</ul>
-	</div>
+			</div>
+		{/each}
+	</ul>
+</div>
 
-	<p class="tip">
-		Tip: click on a file to rename it.<br />
-		You can move files across buckets by holding shift and clicking on a file.
-	</p>
-</AppPage>
+<p class="tip">
+	Tip: click on a file to rename it.<br />
+	You can move files across buckets by holding shift and clicking on a file.
+</p>
 
 <style>
 	@import url(https://fonts.bunny.net/css?family=abeezee:400);

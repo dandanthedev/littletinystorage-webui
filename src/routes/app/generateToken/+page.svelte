@@ -1,5 +1,4 @@
 <script>
-	import AppPage from '$lib/AppPage.svelte';
 	import { customFetch } from '$lib/fetch.js';
 	import { onMount } from 'svelte';
 	let result = 'Generate';
@@ -17,52 +16,50 @@
 	});
 </script>
 
-<AppPage>
-	<div class="container">
-		<h1>Generate Token</h1>
-		<div class="form">
-			<select bind:value={bucket}>
-				<option disabled selected value="">Select a bucket</option>
-				{#each buckets as bucket}
-					<option value={bucket}>{bucket}</option>
-				{/each}
-			</select>
-			<input type="text" placeholder="File Name (optional)" bind:value={fileName} />
-			<select bind:value={type}>
-				<option value="any">Any</option>
-				<option value="upload">Upload</option>
-				<option value="download">Download</option>
-				<option value="delete">Delete</option>
-				<option value="rename">Rename</option>
-			</select>
-			<input type="text" placeholder="Expiry (default 60s)" bind:value={expiresIn} />
-			<p class="note">(examples: 10s, 1m, 1h, 1d, 1w)</p>
-			<button
-				on:click={async () => {
-					if (!bucket) {
-						result = 'Select a bucket';
-						setTimeout(() => {
-							result = 'Generate';
-						}, 2000);
-						return;
-					}
-					const params = new URLSearchParams();
-					if (fileName) params.append('file', fileName);
-					if (type !== 'any') params.append('type', type);
-					if (expiresIn) params.append('expiresIn', expiresIn);
-					const key = await customFetch(`/api/${bucket}/generateToken?${params.toString()}`);
-					if (!key) return;
-					//copy to clipboard
-					navigator.clipboard.writeText(key);
-					result = `Copied!`;
+<div class="container">
+	<h1>Generate Token</h1>
+	<div class="form">
+		<select bind:value={bucket}>
+			<option disabled selected value="">Select a bucket</option>
+			{#each buckets as bucket}
+				<option value={bucket}>{bucket}</option>
+			{/each}
+		</select>
+		<input type="text" placeholder="File Name (optional)" bind:value={fileName} />
+		<select bind:value={type}>
+			<option value="any">Any</option>
+			<option value="upload">Upload</option>
+			<option value="download">Download</option>
+			<option value="delete">Delete</option>
+			<option value="rename">Rename</option>
+		</select>
+		<input type="text" placeholder="Expiry (default 60s)" bind:value={expiresIn} />
+		<p class="note">(examples: 10s, 1m, 1h, 1d, 1w)</p>
+		<button
+			on:click={async () => {
+				if (!bucket) {
+					result = 'Select a bucket';
 					setTimeout(() => {
 						result = 'Generate';
 					}, 2000);
-				}}>{result}</button
-			>
-		</div>
+					return;
+				}
+				const params = new URLSearchParams();
+				if (fileName) params.append('file', fileName);
+				if (type !== 'any') params.append('type', type);
+				if (expiresIn) params.append('expiresIn', expiresIn);
+				const key = await customFetch(`/api/${bucket}/generateToken?${params.toString()}`);
+				if (!key) return;
+				//copy to clipboard
+				navigator.clipboard.writeText(key);
+				result = `Copied!`;
+				setTimeout(() => {
+					result = 'Generate';
+				}, 2000);
+			}}>{result}</button
+		>
 	</div>
-</AppPage>
+</div>
 
 <style>
 	@import url(https://fonts.bunny.net/css?family=abeezee:400|fira-code:400);

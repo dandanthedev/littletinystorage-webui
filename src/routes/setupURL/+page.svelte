@@ -6,7 +6,7 @@
 
 <LogoPage>
 	<p class="sub">We couldn't find your Little Tiny Storage instance. Please enter the URL below.</p>
-	<input type="url" placeholder="https://tls.dandandev.xyz" class="key" />
+	<input type="url" placeholder="https://tls.dandandev.xyz" class="key" bind:value={instance} />
 	<button
 		class="action"
 		on:click={() => {
@@ -36,5 +36,11 @@
 		border: 1px solid black;
 		text-align: center;
 		cursor: pointer;
+	}
+
+	.sub {
+		font-size: 1em;
+		text-align: center;
+		font-family: 'abeezee';
 	}
 </style>

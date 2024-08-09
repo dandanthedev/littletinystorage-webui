@@ -1,15 +1,12 @@
 <script>
 	import { buckets } from '$lib/stores.js';
-	import AppPage from '$lib/AppPage.svelte';
 </script>
 
-<AppPage>
-	<div class="buckets">
-		{#each $buckets as bucket}
-			<a class="bucket" href="/app/bucket?id={bucket}">{bucket}</a>
-		{/each}
-	</div>
-</AppPage>
+<div class="buckets">
+	{#each $buckets as bucket}
+		<a class="bucket" href="/app/bucket?id={bucket}">{bucket}</a>
+	{/each}
+</div>
 
 <style>
 	@import url(https://fonts.bunny.net/css?family=abeezee:400);

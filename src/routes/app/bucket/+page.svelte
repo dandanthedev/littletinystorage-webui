@@ -1,4 +1,5 @@
 <script>
+	import { findInstance } from '$lib/findInstance.js';
 	import { customFetch } from '$lib/fetch.js';
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
@@ -7,6 +8,7 @@
 	let files = [];
 	let file = null;
 	let fileName = '';
+	let instance;
 
 	async function getFiles() {
 		const filesSrv = await customFetch(`/api/${id}/files`);
@@ -17,6 +19,7 @@
 		id = new URLSearchParams(window.location.search).get('id');
 		if (!id) goto('/app');
 		getFiles();
+		instance = await findInstance(id);
 	});
 
 	async function downloadFile(res, fileName) {
@@ -36,7 +39,7 @@
 	async function download(file) {
 		const download = await customFetch(`/${id}/${file}`, {}, null, true);
 		if (download.status === 401) {
-			//TODO: key required`
+			//TODO: key required
 			const params = new URLSearchParams();
 			params.append('file', file);
 			params.append('type', 'download');
@@ -45,19 +48,9 @@
 			if (!key) return;
 			const downloadParams = new URLSearchParams();
 			downloadParams.append('key', key);
-			const download = await customFetch(
-				`/${id}/${file}?${downloadParams.toString()}`,
-				{},
-				null,
-				true
-			);
-			if (download.status === 200) {
-				downloadFile(download, file);
-			} else {
-				alert('Something went wrong');
-			}
+			window.open(`${instance}/${id}/${file}?${downloadParams.toString()}`);
 		} else if (download.status === 200) {
-			downloadFile(download.data, file);
+			window.open(`${instance}/${id}/${file}?${download.data}`);
 		} else {
 			alert('Something went wrong');
 		}
@@ -144,6 +137,13 @@
 	<ul>
 		{#each files as file}
 			<div class="file">
+				<div class="filePreview">
+					{#if file.endsWith('.jpg' || file.endsWith('.png') || file.endsWith('.gif') || file.endsWith('.webp') || file.endsWith('.jpeg'))}
+						<img src={`${instance}/${id}/${file}`} alt={file} />
+					{:else if file.endsWith('.mp4') || file.endsWith('.webm') || file.endsWith('.mkv') || file.endsWith('.avi') || file.endsWith('.mov')}
+						<video src={`${instance}/${id}/${file}`} controls />
+					{/if}
+				</div>
 				<button
 					class="fileName"
 					on:click={(e) => {
@@ -248,5 +248,19 @@
 		font-family: 'abeezee';
 		text-align: center;
 		margin-top: 0;
+	}
+
+	.filePreview {
+		width: 100px;
+		height: 100px;
+		border-radius: 5px;
+		margin-right: 10px;
+		margin-bottom: 10px;
+	}
+
+	.filePreview img {
+		width: 100%;
+		height: 100%;
+		border-radius: 5px;
 	}
 </style>

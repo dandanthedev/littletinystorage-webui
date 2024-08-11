@@ -155,14 +155,16 @@
 			{#each files as file}
 				<tr>
 					<td class="filePreview">
-						{#if file.mimeType.startsWith('image')}
-							<img src={`${instance}/${id}/${file.file}`} alt={file.file} />
-						{:else if file.mimeType.startsWith('video')}
-							<video src={`${instance}/${id}/${file.file}`} controls />
-						{:else if file.mimeType.startsWith('audio')}
-							<audio src={`${instance}/${id}/${file.file}`} controls />
-						{:else}
-							<p>{file.mimeType}</p>
+						{#if file.mimeType}
+							{#if file.mimeType.startsWith('image')}
+								<img src={`${instance}/${id}/${file.file}`} alt={file.file} />
+							{:else if file.mimeType.startsWith('video')}
+								<video src={`${instance}/${id}/${file.file}`} controls />
+							{:else if file.mimeType.startsWith('audio')}
+								<audio src={`${instance}/${id}/${file.file}`} controls />
+							{:else}
+								<p>{file.mimeType}</p>
+							{/if}
 						{/if}
 					</td>
 					<td>

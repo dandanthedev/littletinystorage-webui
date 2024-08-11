@@ -179,7 +179,7 @@
 								}
 								const newName = prompt('Enter a new name', file.file);
 								if (!newName) return;
-								renameFile(file, newName, newBucket);
+								renameFile(file.file, newName, newBucket);
 							}}>{file.file}</button
 						>
 					</td>

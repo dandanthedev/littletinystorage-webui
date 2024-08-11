@@ -37,7 +37,9 @@
 			params.append('file', file);
 			params.append('type', 'download');
 			params.append('expiresIn', '10s');
-			const key = await customFetch(`/api/${id}/generateToken?${params.toString()}`);
+			const key = await customFetch(`/api/${id}/token?${params.toString()}`, {
+				method: 'POST'
+			});
 			if (!key) return;
 			const downloadParams = new URLSearchParams();
 			downloadParams.append('key', key);
@@ -56,7 +58,9 @@
 		tokenParams.append('file', file);
 		tokenParams.append('type', 'delete');
 		tokenParams.append('expiresIn', '10s');
-		const key = await customFetch(`/api/${id}/generateToken?${tokenParams.toString()}`);
+		const key = await customFetch(`/api/${id}/token?${tokenParams.toString()}`, {
+			method: 'POST'
+		});
 		if (!key) return;
 
 		const deleteParams = new URLSearchParams();
@@ -75,7 +79,9 @@
 		tokenParams.append('file', file);
 		tokenParams.append('type', 'rename');
 		tokenParams.append('expiresIn', '10s');
-		const key = await customFetch(`/api/${id}/generateToken?${tokenParams.toString()}`);
+		const key = await customFetch(`/api/${id}/token?${tokenParams.toString()}`, {
+			method: 'POST'
+		});
 		if (!key) return;
 
 		const renameParams = new URLSearchParams();
@@ -118,7 +124,9 @@
 			tokenParams.append('file', fileName);
 			tokenParams.append('type', 'upload');
 			tokenParams.append('expiresIn', '1m');
-			const key = await customFetch(`/api/${id}/generateToken?${tokenParams.toString()}`);
+			const key = await customFetch(`/api/${id}/token?${tokenParams.toString()}`, {
+				method: 'POST'
+			});
 			if (!key) return;
 			formData.append('key', key);
 

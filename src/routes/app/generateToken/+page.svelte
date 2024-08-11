@@ -48,7 +48,9 @@
 				if (fileName) params.append('file', fileName);
 				if (type !== 'any') params.append('type', type);
 				if (expiresIn) params.append('expiresIn', expiresIn);
-				const key = await customFetch(`/api/${bucket}/generateToken?${params.toString()}`);
+				const key = await customFetch(`/api/${bucket}/token?${params.toString()}`, {
+					method: 'POST'
+				});
 				if (!key) return;
 				//copy to clipboard
 				navigator.clipboard.writeText(key);

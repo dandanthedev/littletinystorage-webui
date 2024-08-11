@@ -3,7 +3,7 @@
 	import { onMount } from 'svelte';
 	let env = {};
 	onMount(async () => {
-		env = await customFetch('/api/getEnv');
+		env = await customFetch('/api/env');
 	});
 </script>
 
@@ -24,7 +24,7 @@
 			alert('Copied to clipboard');
 		} else {
 			const res = await customFetch(
-				'/api/setEnv',
+				'/api/env',
 				{
 					method: 'POST',
 					body: JSON.stringify(env.env)

@@ -11,7 +11,7 @@
 	let instance;
 
 	async function getFiles() {
-		const filesSrv = await customFetch(`/api/${id}/fileStats`);
+		const filesSrv = await customFetch(`/api/${id}/files?metadata=true`);
 		files = filesSrv ?? [];
 	}
 
@@ -22,22 +22,15 @@
 		instance = await findInstance(id);
 	});
 
-	async function downloadFile(res, fileName) {
-		//create a blob from the response
-		const blob = await res.blob();
-		//create a URL from the blob
-		const url = URL.createObjectURL(blob);
-		//create a link to download the file
-		const link = document.createElement('a');
-		link.href = url;
-		link.download = fileName;
-		document.body.appendChild(link);
-		link.click();
-		document.body.removeChild(link);
-	}
-
 	async function download(file) {
-		const download = await customFetch(`/${id}/${file}`, {}, null, true);
+		const download = await customFetch(
+			`/${id}/${file}`,
+			{
+				method: 'HEAD'
+			},
+			null,
+			true
+		);
 		if (download.status === 401) {
 			//TODO: key required
 			const params = new URLSearchParams();
@@ -49,7 +42,7 @@
 			const downloadParams = new URLSearchParams();
 			downloadParams.append('key', key);
 			window.open(`${instance}/${id}/${file}?${downloadParams.toString()}`);
-		} else if (download.status === 200) {
+		} else if (download.status === 204) {
 			window.open(`${instance}/${id}/${file}?${download.data}`);
 		} else {
 			alert('Something went wrong');
@@ -185,8 +178,8 @@
 					<td class="fileSize">{parseSize(file.size)}</td>
 
 					<td class="fileActions">
-						<button on:click={() => download(file)}>Download</button>
-						<button on:click={() => deleteFile(file)}>Delete</button>
+						<button on:click={() => download(file.file)}>Download</button>
+						<button on:click={() => deleteFile(file.file)}>Delete</button>
 					</td>
 				</tr>
 			{/each}

@@ -157,11 +157,15 @@
 					<td class="filePreview">
 						{#if file.mimeType}
 							{#if file.mimeType.startsWith('image')}
-								<img src={`${instance}/${id}/${file.file}`} alt={file.file} />
+								<img src={`${instance}/${id}/${file.file}`} alt={file.file} loading="lazy" />
 							{:else if file.mimeType.startsWith('video')}
-								<video src={`${instance}/${id}/${file.file}`} controls />
+								<video controls>
+									<source src={`${instance}/${id}/${file.file}`} type={file.mimeType} />
+								</video>
 							{:else if file.mimeType.startsWith('audio')}
-								<audio src={`${instance}/${id}/${file.file}`} controls />
+								<audio controls>
+									<source src={`${instance}/${id}/${file.file}`} type={file.mimeType} />
+								</audio>
 							{:else}
 								<p>{file.mimeType}</p>
 							{/if}

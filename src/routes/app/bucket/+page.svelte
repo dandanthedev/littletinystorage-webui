@@ -177,7 +177,7 @@
 									);
 									if (bucketPrompt) newBucket = bucketPrompt;
 								}
-								const newName = prompt('Enter a new name', file);
+								const newName = prompt('Enter a new name', file.file);
 								if (!newName) return;
 								renameFile(file, newName, newBucket);
 							}}>{file.file}</button

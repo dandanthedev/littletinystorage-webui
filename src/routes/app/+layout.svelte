@@ -21,7 +21,9 @@
 		<img src="/logo.png" alt="Logo" class="logo" />
 		<div class="menu">
 			<a href="/app">Home</a>
+			<span class="separator" aria-hidden="true">·</span>
 			<a href="/app/generateToken">Generate Token</a>
+			<span class="separator" aria-hidden="true">·</span>
 			<a href="/app/env">Config</a>
 		</div>
 		<button
@@ -79,6 +81,12 @@
 	.menu a {
 		font-size: 1.5em;
 		text-decoration: none;
+		font-family: 'abeezee';
+		color: black;
+	}
+
+	.separator {
+		font-size: 1.5em;
 		font-family: 'abeezee';
 		color: black;
 	}
